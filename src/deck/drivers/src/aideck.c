@@ -25,27 +25,29 @@
  */
 #define DEBUG_MODULE "AIDECK"
 
+
 #include <stdint.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
 
 #include "stm32fxxx.h"
 #include "config.h"
 #include "console.h"
 #include "uart1.h"
-#include "debug.h"
 #include "deck.h"
 #include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
-#include <string.h>
-#include <stdlib.h>
-#include <math.h>
 #include "log.h"
 #include "param.h"
 #include "system.h"
 #include "uart1.h"
 #include "uart2.h"
+
+// ADDED
+#include "aideck_protocol.h"
 
 static bool isInit = false;
 static uint8_t byte;
@@ -80,6 +82,91 @@ static void NinaTask(void *param)
 }
 #endif
 
+/* THIS IS ADDED */
+// Read n bytes from UART, returning the read size before ev. timing out.
+static input_t inputs[INPUT_NUMBER] = {
+    {.header = "!CAM", .callback = __camera_cb, .size = sizeof(camera_t)},
+    {.header = "!STR", .callback = __stream_cb, .size = sizeof(stream_t)},
+    {.header = "!POS", .callback = __position_cb, .size = sizeof(position_t)},
+    {.header = "!DET", .callback = __detection_cb, .size = sizeof(detection_t)}
+    };
+
+static int read_uart_bytes(int size, uint8_t *buffer)
+{
+    uint8_t *byte = buffer;
+    for (int i = 0; i < size; i++)
+    {
+        if (uart1GetDataWithDefaultTimeout(byte))
+        {
+            byte++;
+        }
+        else
+        {
+            return i;
+        }
+    }
+    return size;
+}
+// Read UART 1 while looking for structured messages.
+// When none are found, print everything to console.
+static uint8_t header_buffer[HEADER_LENGTH];
+static uint8_t rx_buffer[BUFFER_LENGTH];
+
+
+static void read_uart_message()
+{
+  uint8_t *byte = header_buffer;
+  int n = 0;
+  input_t *input;
+  input_t *begin = (input_t *) inputs;
+  input_t *end = begin + INPUT_NUMBER;
+  for (input = begin; input < end; input++) input->valid = 1;
+  while(n < HEADER_LENGTH)
+  {
+    if(uart1GetDataWithDefaultTimeout(byte))
+    {
+      int valid = 0;
+      for (input = begin; input < end; input++) {
+        if(!(input->valid)) continue;
+        if(*byte != (input->header)[n]){
+          input->valid = 0;
+        }
+        else{
+          valid = 1;
+        }
+      }
+      n++;
+      if(valid)
+      {
+        // Keep reading
+        byte++;
+        continue;
+      }
+    }
+    // forward to console and return;
+    for (size_t i = 0; i < n; i++) {
+      consolePutchar(header_buffer[i]);
+    }
+    return;
+  }
+  // Found message
+  for (input = begin; input < end; input++)
+  {
+    if(input->valid) break;
+  }
+  int size = read_uart_bytes(input->size, rx_buffer);
+  if( size == input->size )
+  {
+    // Call the corresponding callback
+    input->callback(rx_buffer);
+  }
+  else{
+    DEBUG_PRINT("Failed to receive message %4s: (%d vs %d bytes received)\n",
+                 input->header, size, input->size);
+  }
+}
+/* END ADDED */
+
 static void Gap8Task(void *param)
 {
     systemWaitStart();
@@ -92,11 +179,13 @@ static void Gap8Task(void *param)
     digitalWrite(DECK_GPIO_IO4, HIGH);
     pinMode(DECK_GPIO_IO4, INPUT_PULLUP);
 
-    // Read out the byte the Gap8 sends and immediately send it to the console.
+    /* CHANGED */
+    DEBUG_PRINT("Starting UART listener\n");
     while (1)
     {
-        uart1GetDataWithDefaultTimeout(&byte);
+        read_uart_message();
     }
+    /* END CHANGED */
 }
 
 static void aideckInit(DeckInfo *info)

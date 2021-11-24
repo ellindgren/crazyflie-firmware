@@ -218,6 +218,7 @@ ifeq ($(UART2_LINK), 1)
 CFLAGS += -DUART2_LINK_COMM
 else
 PROJ_OBJ += aideck.o
+PROJ_OBJ += aideck_protocol.o
 endif
 
 ifeq ($(LPS_TDOA_ENABLE), 1)
@@ -493,18 +494,4 @@ unit:
 # The flag "-DUNITY_INCLUDE_DOUBLE" allows comparison of double values in Unity. See: https://stackoverflow.com/a/37790196
 	rake unit "DEFINES=$(CFLAGS) -DUNITY_INCLUDE_DOUBLE" "FILES=$(FILES)" "UNIT_TEST_STYLE=$(UNIT_TEST_STYLE)"
 
-# Python bindings
-MOD_INC = $(CRAZYFLIE_BASE)/src/modules/interface
-MOD_SRC = $(CRAZYFLIE_BASE)/src/modules/src
-
-bindings_python: bindings/setup.py bin/cffirmware_wrap.c $(MOD_SRC)/*.c
-	$(PYTHON) bindings/setup.py build_ext --inplace
-
-bin/cffirmware_wrap.c cffirmware.py: bindings/cffirmware.i $(MOD_INC)/*.h
-	swig -python -I$(MOD_INC) -o bin/cffirmware_wrap.c bindings/cffirmware.i
-	mv bin/cffirmware.py cffirmware.py
-
-test_python: bindings_python
-	$(PYTHON) -m pytest test_python
-
-.PHONY: all clean build compile unit prep erase flash check_submodules trace openocd gdb halt reset flash_dfu flash_verify cload size print_version clean_version bindings_python
+.PHONY: all clean build compile unit prep erase flash check_submodules trace openocd gdb halt reset flash_dfu flash_verify cload size print_version clean_version
