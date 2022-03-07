@@ -218,7 +218,7 @@ void save_detection_values(detection_t *savehere)
 {
     savehere->xt = __detection__config.value.xt;
     savehere->yt = __detection__config.value.yt;
-    savehere->height = __detection__config.value.height;
-    savehere->width = __detection__config.value.width;
+    savehere->height = __detection__config.value.width;
+    savehere->width = __detection__config.value.height;
     savehere->prob = __detection__config.value.prob;
 }

@@ -165,6 +165,7 @@ PROJ_OBJ += platformservice.o sound_cf2.o extrx.o sysload.o mem.o
 PROJ_OBJ += range.o app_handler.o static_mem.o app_channel.o
 PROJ_OBJ += eventtrigger.o supervisor.o
 
+
 # Stabilizer modules
 PROJ_OBJ += commander.o crtp_commander.o crtp_commander_rpyt.o
 PROJ_OBJ += crtp_commander_generic.o crtp_localization_service.o peer_localization.o
@@ -213,6 +214,7 @@ PROJ_OBJ += multiranger.o
 PROJ_OBJ += lighthouse.o
 PROJ_OBJ += activeMarkerDeck.o
 
+
 # Uart2 Link for CRTP communication is not compatible with decks using uart2
 ifeq ($(UART2_LINK), 1)
 CFLAGS += -DUART2_LINK_COMM
@@ -260,6 +262,8 @@ PROJ_OBJ += configblockeeprom.o
 PROJ_OBJ += sleepus.o statsCnt.o rateSupervisor.o
 PROJ_OBJ += lighthouse_core.o pulse_processor.o pulse_processor_v1.o pulse_processor_v2.o lighthouse_geometry.o ootx_decoder.o lighthouse_calibration.o lighthouse_deck_flasher.o lighthouse_position_est.o lighthouse_storage.o lighthouse_transmit.o
 PROJ_OBJ += kve_storage.o kve.o
+
+#PROJ_OBJ += obstacle_avoidance.o
 
 ifeq ($(DEBUG_PRINT_ON_SEGGER_RTT), 1)
 VPATH += $(LIB)/Segger_RTT/RTT

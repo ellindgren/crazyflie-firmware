@@ -104,6 +104,8 @@
 #define UART2_TASK_PRI          3
 #define CRTP_SRV_TASK_PRI       0
 #define PLATFORM_SRV_TASK_PRI   0
+#define OBSTACLE_AVOIDANCE_PRI  0 
+
 
 // Not compiled
 #if 0
@@ -154,6 +156,10 @@
 #define UART2_TASK_NAME         "UART2"
 #define CRTP_SRV_TASK_NAME      "CRTP-SRV"
 #define PLATFORM_SRV_TASK_NAME  "PLATFORM-SRV"
+#define OBSTACLE_AVIDANCE_TASK_NAME	"OBST-AV"
+
+
+
 
 //Task stack sizes
 #define SYSTEM_TASK_STACKSIZE         (2* configMINIMAL_STACK_SIZE)
@@ -188,6 +194,9 @@
 #define UART2_TASK_STACKSIZE          configMINIMAL_STACK_SIZE
 #define CRTP_SRV_TASK_STACKSIZE       configMINIMAL_STACK_SIZE
 #define PLATFORM_SRV_TASK_STACKSIZE   configMINIMAL_STACK_SIZE
+#define OBSTACLE_AVOIDANCE_STACKSIZE  (2*configMINIMAL_STACK_SIZE)
+
+
 
 //The radio channel. From 0 to 125
 #define RADIO_CHANNEL 80

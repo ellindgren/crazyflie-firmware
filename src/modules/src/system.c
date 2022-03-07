@@ -31,7 +31,6 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "semphr.h"
-
 #include "debug.h"
 #include "version.h"
 #include "config.h"
@@ -70,6 +69,7 @@
 #include "peer_localization.h"
 #include "cfassert.h"
 #include "i2cdev.h"
+#include "obstacle_avoidance.h"
 
 #ifndef START_DISARMED
 #define ARM_INIT true
@@ -191,6 +191,9 @@ void systemTask(void *arg)
   deckInit();
   estimator = deckGetRequiredEstimator();
   stabilizerInit(estimator);
+  //obstacleAvoidanceTaskInit();
+
+  
   if (deckGetRequiredLowInterferenceRadioMode() && platformConfigPhysicalLayoutAntennasAreClose())
   {
     platformSetLowInterferenceRadioMode();
